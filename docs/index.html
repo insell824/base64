@@ -24,6 +24,7 @@
         width: 100%;
         height: 200px;
         font-size: 14px;
+        padding: 4px;
       }
       .convert-button {
         font-size: 14px;
@@ -50,6 +51,8 @@
         width: 100%;
         height: 100px;
         font-size: 13px;
+        background-color: #eeeeee;
+        padding: 4px;
       }
       a {
         text-decoration: none;
@@ -59,21 +62,24 @@
         text-decoration: underline;
       }
       .badge {
-        display: inline-block;
         border-radius: 2px;
         padding-left: 6px;
         padding-right: 6px;
       }
+      [v-cloak] {
+        display: none;
+      }
     </style>
   </head>
   <body>
-    <div id="app">
+    <div id="app" v-cloak>
       <div style="padding: 10px">
-        <div style="max-width: 700px; margin: 0 auto">
+        <div style="max-width: 700px">
           <h3>Text Base64 Encoder/Decoder</h3>
           <p>
             <small>Works inside the browser JavaScript.</small>
           </p>
+
           <h4>Original</h4>
           <textarea class="textarea" v-model="original"></textarea>
           <div style="display: flex; gap: 10px">
@@ -94,37 +100,49 @@
               Decode
             </button>
           </div>
+
           <h4>Converted</h4>
           <div v-if="isError" class="err">Error</div>
-          <textarea class="textarea" v-model="converted" disabled></textarea>
+          <textarea
+            class="textarea"
+            v-model="converted"
+            readonly
+            onclick="this.select()"
+            style="background-color: #eeeeee"
+          ></textarea>
+
           <h4>History</h4>
           <p>
-            <small
-              >No history is saved. It will be deleted when you reload.</small
-            >
+            <small>
+              No history is saved. It will be deleted when you reload.
+            </small>
           </p>
           <div style="height: 8px"></div>
           <div v-if="history.length === 0" style="color: grey">None</div>
-          <div v-for="(item, index) in history" :key="index">
-            <div v-if="item.isEncode">
+          <div v-for="item in history" :key="item.key">
+            <div
+              v-if="item.isEncode"
+              style="display: flex; gap: 4px; align-items: flex-end"
+            >
               <div class="badge" style="background-color: #ffee58">Encode</div>
-              (Plain to Base64)
+              <small>(Plain to Base64)</small>
             </div>
-            <div v-else>
+            <div v-else style="display: flex; gap: 4px; align-items: flex-end">
               <div class="badge" style="background-color: #a5d6a7">Decode</div>
-              (Base64 to Plain)
+              <small>(Base64 to Plain)</small>
             </div>
-            <div style="display: flex">
-              <div style="flex-grow: 1">
-                <small>Original</small>
+            <div style="display: grid; grid-template-columns: 1fr 1fr">
+              <div>
+                <small style="display: block">Original</small>
                 <textarea
-                  disabled
+                  readonly
                   :value="item.original"
                   class="textarea-history"
+                  onclick="this.select()"
                 ></textarea>
               </div>
-              <div style="flex-grow: 1">
-                <small>Converted</small>
+              <div>
+                <small style="display: block">Converted</small>
                 <div v-if="item.isError">
                   <small
                     style="
@@ -137,9 +155,10 @@
                 </div>
                 <textarea
                   v-else
-                  disabled
+                  readonly
                   :value="item.converted"
                   class="textarea-history"
+                  onclick="this.select()"
                 ></textarea>
               </div>
             </div>
@@ -167,6 +186,7 @@
             isError: false,
             history: [
               // {
+              //   key: '***',
               //   isEncode: false,
               //   original: '',
               //   converted: '',
@@ -177,13 +197,25 @@
         },
         mounted() {},
         methods: {
+          generateRandomText(len) {
+            const str = 'abcdefghijklmnopqrstuvwxyz0123456789'
+            let result = ''
+            for (var i = 0; i < str.length; i++)
+              result += str[Math.floor(Math.random() * str.length)]
+            return result
+          },
           convert(isEncode) {
             try {
               this.isError = false
               this.converted = ''
               if (this.original === '') return
-              if (isEncode) this.converted = Base64.encode(this.original)
-              else this.converted = Base64.decode(this.original)
+              if (isEncode) {
+                this.converted = Base64.encode(this.original)
+              } else {
+                if (!Base64.isValid(this.original))
+                  throw new Error('Invalid Format.')
+                this.converted = Base64.decode(this.original)
+              }
             } catch (err) {
               this.isError = true
               console.error(err)
@@ -195,6 +227,7 @@
               pre.isEncode !== isEncode
             )
               this.history.unshift({
+                key: this.generateRandomText(20),
                 isEncode,
                 original: this.original,
                 converted: this.converted,
