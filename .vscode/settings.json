@@ -30,8 +30,8 @@
   "[yaml]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "eslint.packageManager": "npm",
+  // "eslint.packageManager": "npm",
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": true
+    // "source.fixAll.eslint": true
   }
 }
