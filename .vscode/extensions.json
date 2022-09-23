@@ -1,0 +1,10 @@
+{
+  "recommendations": [
+    "streetsidesoftware.code-spell-checker",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode"
+    // "syler.sass-indented",
+    // "editorconfig.editorconfig",
+    // "davidanson.vscode-markdownlint"
+  ]
+}
